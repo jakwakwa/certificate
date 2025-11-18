@@ -9,8 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     
-    <!-- html2pdf library for PDF generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     
     <!-- HTML5 Shim and Respond.js for IE8 support -->
     <!--[if lt IE 9]>
@@ -322,45 +320,6 @@
             </div>
         </div>
     </div>
-    
-    <script>
-        document.getElementById('download-pdf-btn').addEventListener('click', function() {
-            const button = this;
-            const certificateContainer = document.querySelector('.certificate-container');
-            
-            // Hide the button during PDF generation
-            button.style.display = 'none';
-            
-            // Configure PDF options for A4 size with high quality
-            const opt = {
-                margin: 0,
-                filename: 'Share_Certificate_SC-2025-007.pdf',
-                image: { type: 'jpeg', quality: 1 },
-                html2canvas: { 
-                    scale: 3,
-                    useCORS: true,
-                    letterRendering: true,
-                    backgroundColor: '#f9eeee',
-                    logging: false
-                },
-                jsPDF: { 
-                    unit: 'mm', 
-                    format: 'a4', 
-                    orientation: 'portrait',
-                    compress: false
-                },
-                pagebreak: { mode: 'avoid-all' }
-            };
-            
-            // Generate PDF
-            html2pdf().set(opt).from(certificateContainer).save().then(function() {
-                // Show the button again after PDF is generated
-                button.style.display = 'flex';
-            }).catch(function(error) {
-                console.error('PDF generation failed:', error);
-                button.style.display = 'flex';
-            });
-        });
-    </script>
+    <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
