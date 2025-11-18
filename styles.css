@@ -29,6 +29,7 @@ html, body {
 body {
   background-color: var(--color-bg-primary);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   /* padding-top: 10px; */
@@ -193,7 +194,7 @@ header p {
   font-weight: 700;
   font-size: 96px;
   color: var(--color-accent);
-  text-shadow:1px 5px 1px rgba(84, 55, 55, 0.7) ;
+  text-shadow:1px 5px 1px rgba(84, 55, 55, 0.5) ;
   margin-bottom: 8px;
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
@@ -416,4 +417,75 @@ footer {
 
 .signature-title {
   font-weight: 600;
+}
+
+/* Download PDF Button */
+.download-pdf-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: flex;
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  align-items: center;
+  gap: 8px;
+  background: -webkit-linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
+  background: -moz-linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
+  color: var(--color-text-primary);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  padding: 12px 24px;
+  border: none;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  -webkit-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  -webkit-transition: all 0.3s ease;
+  -moz-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.download-pdf-button:hover {
+  -webkit-transform: translateY(-2px);
+  -moz-transform: translateY(-2px);
+  transform: translateY(-2px);
+  -webkit-box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.4), 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.4), 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.4), 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  background: -webkit-linear-gradient(135deg, var(--color-accent-hover), var(--color-accent));
+  background: -moz-linear-gradient(135deg, var(--color-accent-hover), var(--color-accent));
+  background: linear-gradient(135deg, var(--color-accent-hover), var(--color-accent));
+}
+
+.download-pdf-button:active {
+  -webkit-transform: translateY(0px);
+  -moz-transform: translateY(0px);
+  transform: translateY(0px);
+  -webkit-box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.2);
+}
+
+.download-pdf-button svg {
+  width: 20px;
+  height: 20px;
+  -webkit-flex-shrink: 0;
+  -moz-flex-shrink: 0;
+  flex-shrink: 0;
+}
+
+/* Print-specific styles to hide the button when generating PDF */
+@media print {
+  .download-pdf-button {
+    display: none !important;
+  }
 }
