@@ -118,19 +118,19 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   const gradTopRightDef = document.createElementNS(ns, 'linearGradient');
   gradTopRightDef.setAttribute('id', 'grad-top-right');
   gradTopRightDef.setAttribute('gradientUnits', 'userSpaceOnUse');
-  gradTopRightDef.setAttribute('x1', String(containerWidth - 195));
+  gradTopRightDef.setAttribute('x1', String(containerWidth - 145));
   gradTopRightDef.setAttribute('y1', '0');
   gradTopRightDef.setAttribute('x2', String(containerWidth));
   gradTopRightDef.setAttribute('y2', '110');
   const gtrStop1 = document.createElementNS(ns, 'stop');
-  gtrStop1.setAttribute('offset', '20%');
-  gtrStop1.setAttribute('stop-color', '#6f4314');
+  gtrStop1.setAttribute('offset', '0%');
+  gtrStop1.setAttribute('stop-color', '#332e36');
   const gtrStop2 = document.createElementNS(ns, 'stop');
-  gtrStop2.setAttribute('offset', '65%');
-  gtrStop2.setAttribute('stop-color', '#e6b52d');
+  gtrStop2.setAttribute('offset', '60%');
+  gtrStop2.setAttribute('stop-color', '#d8ba6a');
   const gtrStop3 = document.createElementNS(ns, 'stop');
   gtrStop3.setAttribute('offset', '100%');
-  gtrStop3.setAttribute('stop-color', '#efc12b');
+  gtrStop3.setAttribute('stop-color', '#a1822c');
   gradTopRightDef.appendChild(gtrStop1);
   gradTopRightDef.appendChild(gtrStop2);
   gradTopRightDef.appendChild(gtrStop3);
@@ -141,16 +141,20 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   gradBottomLeftDef.setAttribute('gradientUnits', 'userSpaceOnUse');
   gradBottomLeftDef.setAttribute('x1', '0');
   gradBottomLeftDef.setAttribute('y1', String(containerHeight));
-  gradBottomLeftDef.setAttribute('x2', '195');
+  gradBottomLeftDef.setAttribute('x2', '145');
   gradBottomLeftDef.setAttribute('y2', String(containerHeight - 110));
   const gblStop1 = document.createElementNS(ns, 'stop');
   gblStop1.setAttribute('offset', '0%');
-  gblStop1.setAttribute('stop-color', '#efc12b');
+  gblStop1.setAttribute('stop-color', '#332e36');
   const gblStop2 = document.createElementNS(ns, 'stop');
-  gblStop2.setAttribute('offset', '100%');
-  gblStop2.setAttribute('stop-color', '#e6b52d');
+  gblStop2.setAttribute('offset', '60%');
+  gblStop2.setAttribute('stop-color', '#d8ba6a');
+  const gblStop3 = document.createElementNS(ns, 'stop');
+  gblStop3.setAttribute('offset', '100%');
+  gblStop3.setAttribute('stop-color', '#a1822c');
   gradBottomLeftDef.appendChild(gblStop1);
   gradBottomLeftDef.appendChild(gblStop2);
+  gradBottomLeftDef.appendChild(gblStop3);
   defs.appendChild(gradBottomLeftDef);
 
   const borderInner = document.createElementNS(ns, 'rect');
@@ -159,31 +163,31 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   borderInner.setAttribute('width', `${containerWidth - 16}`);
   borderInner.setAttribute('height', `${containerHeight - 16}`);
   borderInner.setAttribute('fill', 'none');
-  borderInner.setAttribute('stroke', '#6f4314');
+  borderInner.setAttribute('stroke', '#7a6d4d');
   borderInner.setAttribute('stroke-width', '1');
   g.appendChild(borderInner);
 
   const cornerTop = document.createElementNS(ns, 'path');
   cornerTop.setAttribute('d', `M 16 16 L 16 208 M 16 16 L 208 16`);
-  cornerTop.setAttribute('stroke', '#6f4314');
+  cornerTop.setAttribute('stroke', '#7a6d4d');
   cornerTop.setAttribute('stroke-width', '2');
   cornerTop.setAttribute('fill', 'none');
   g.appendChild(cornerTop);
 
   const cornerBottom = document.createElementNS(ns, 'path');
   cornerBottom.setAttribute('d', `M ${containerWidth - 16} ${containerHeight - 16} L ${containerWidth - 16} ${containerHeight - 208} M ${containerWidth - 16} ${containerHeight - 16} L ${containerWidth - 208} ${containerHeight - 16}`);
-  cornerBottom.setAttribute('stroke', '#6f4314');
+  cornerBottom.setAttribute('stroke', '#7a6d4d');
   cornerBottom.setAttribute('stroke-width', '2');
   cornerBottom.setAttribute('fill', 'none');
   g.appendChild(cornerBottom);
 
   const gradTopRight = document.createElementNS(ns, 'polygon');
-  gradTopRight.setAttribute('points', `${containerWidth} 0, ${containerWidth - 195} 0, ${containerWidth} 110`);
+  gradTopRight.setAttribute('points', `${containerWidth - 8 } 8, ${containerWidth - 235} 8, ${containerWidth - 8 } 100`);
   gradTopRight.setAttribute('fill', 'url(#grad-top-right)');
   g.appendChild(gradTopRight);
 
   const gradBottomLeft = document.createElementNS(ns, 'polygon');
-  gradBottomLeft.setAttribute('points', `0 ${containerHeight}, 195 ${containerHeight}, 0 ${containerHeight - 110}`);
+  gradBottomLeft.setAttribute('points', `9 ${containerHeight - 9}, 460 ${containerHeight - 9}, 9 ${containerHeight - 170}`);
   gradBottomLeft.setAttribute('fill', 'url(#grad-bottom-left)');
   g.appendChild(gradBottomLeft);
 
@@ -197,7 +201,7 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   header.setAttribute('font-family', 'Inter');
   header.setAttribute('font-size', '24');
   header.setAttribute('font-weight', 'bold');
-  header.setAttribute('fill', '#6f4314');
+  header.setAttribute('fill', '#7a6d4d');
   setTextWithTracking(header, data.company, 2);
   g.appendChild(header);
 
@@ -224,7 +228,7 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   amountNum.setAttribute('font-family', 'Inter');
   amountNum.setAttribute('font-size', '96');
   amountNum.setAttribute('font-weight', 'bold');
-  amountNum.setAttribute('fill', '#efc12b');
+  amountNum.setAttribute('fill', '#d5a60c');
   amountNum.textContent = data.amountNumber;
   // Realistic text-shadow to match CSS
   const amountShadow = document.createElementNS(ns, 'text');
@@ -234,8 +238,8 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   amountShadow.setAttribute('font-family', 'Inter');
   amountShadow.setAttribute('font-size', '96');
   amountShadow.setAttribute('font-weight', 'bold');
-  amountShadow.setAttribute('fill', 'rgba(84,55,55,0.35)');
-  amountShadow.setAttribute('transform', 'translate(1,5)');
+  amountShadow.setAttribute('fill', '#5f5c5c');
+  amountShadow.setAttribute('transform', 'translate(1,3)');
   amountShadow.textContent = data.amountNumber;
   g.appendChild(amountShadow);
   g.appendChild(amountNum);
@@ -262,7 +266,7 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   issuedLabel.setAttribute('font-family', 'Inter');
   issuedLabel.setAttribute('font-size', '14');
   issuedLabel.setAttribute('font-weight', 'bold');
-  issuedLabel.setAttribute('fill', '#1f2121');
+  issuedLabel.setAttribute('fill', '#7a6d4d');
   setTextWithTracking(issuedLabel, data.issuedToLabel, 2);
   g.appendChild(issuedLabel);
 
@@ -273,8 +277,8 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   issuedName.setAttribute('y', `${y}`);
   issuedName.setAttribute('text-anchor', 'middle');
   issuedName.setAttribute('font-family', 'Inter');
-  issuedName.setAttribute('font-size', '18');
-  issuedName.setAttribute('font-weight', 'normal');
+  issuedName.setAttribute('font-size', '24');
+  issuedName.setAttribute('font-weight', 'bold');
   issuedName.setAttribute('fill', '#1f2121');
   issuedName.textContent = data.issuedToName;
   g.appendChild(issuedName);
@@ -284,7 +288,7 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   nameUnderline.setAttribute('y1', `${y + 8}`);
   nameUnderline.setAttribute('x2', `${containerWidth / 2 + 200}`);
   nameUnderline.setAttribute('y2', `${y + 8}`);
-  nameUnderline.setAttribute('stroke', '#6f4314');
+  nameUnderline.setAttribute('stroke', '#7a6d4d');
   nameUnderline.setAttribute('stroke-width', '1');
   g.appendChild(nameUnderline);
 
@@ -306,7 +310,7 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
     tLabel.setAttribute('font-family', 'Inter');
     tLabel.setAttribute('font-size', '14');
     tLabel.setAttribute('font-weight', 'bold');
-    tLabel.setAttribute('fill', '#6f4314');
+    tLabel.setAttribute('fill', '#7a6d4d');
     setTextWithTracking(tLabel as SVGTextElement, label, 2);
     g.appendChild(tLabel);
 
@@ -325,11 +329,11 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   y += 100;
 
   const sealG = document.createElementNS(ns, 'g');
-  sealG.setAttribute('transform', `translate(${containerWidth / 2 - 75}, ${y}) scale(0.36)`);
+  sealG.setAttribute('transform', `translate(${containerWidth / 2 - 110}, ${y + 50}) scale(0.60)`);
   sealG.innerHTML = data.sealSVG.replace(/<svg[^>]*>/, '').replace('</svg>', '');
   g.appendChild(sealG);
 
-  y += 220;
+  y += 320;
 
   const sig1X = containerWidth / 2 - 180;
   const sig2X = containerWidth / 2 + 180;
@@ -341,7 +345,7 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   sig1Name.setAttribute('font-family', 'EB Garamond');
   sig1Name.setAttribute('font-size', '28');
   sig1Name.setAttribute('font-style', 'italic');
-  sig1Name.setAttribute('fill', '#6f4314');
+  sig1Name.setAttribute('fill', '#7a6d4d');
   sig1Name.textContent = data.signature1Name;
   g.appendChild(sig1Name);
 
@@ -350,7 +354,7 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   sig1Line.setAttribute('y1', `${y + 10}`);
   sig1Line.setAttribute('x2', `${sig1X + 128}`);
   sig1Line.setAttribute('y2', `${y + 10}`);
-  sig1Line.setAttribute('stroke', '#6f4314');
+  sig1Line.setAttribute('stroke', '#7a6d4d');
   sig1Line.setAttribute('stroke-width', '2');
   g.appendChild(sig1Line);
 
@@ -372,7 +376,7 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   sig2Name.setAttribute('font-family', 'EB Garamond');
   sig2Name.setAttribute('font-size', '28');
   sig2Name.setAttribute('font-style', 'italic');
-  sig2Name.setAttribute('fill', '#6f4314');
+  sig2Name.setAttribute('fill', '#7a6d4d');
   sig2Name.textContent = data.signature2Name;
   g.appendChild(sig2Name);
 
@@ -381,7 +385,7 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   sig2Line.setAttribute('y1', `${y + 10}`);
   sig2Line.setAttribute('x2', `${sig2X + 128}`);
   sig2Line.setAttribute('y2', `${y + 10}`);
-  sig2Line.setAttribute('stroke', '#6f4314');
+  sig2Line.setAttribute('stroke', '#7a6d4d');
   sig2Line.setAttribute('stroke-width', '2');
   g.appendChild(sig2Line);
 
