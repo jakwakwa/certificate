@@ -1,3 +1,5 @@
+// @ts-no-check 
+
 import { jsPDF } from 'jspdf';
 import {svg2pdf} from 'svg2pdf.js';
 
@@ -74,18 +76,22 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   svg.setAttribute('xmlns', ns);
 
   const defs = document.createElementNS(ns, 'defs');
-  defs.innerHTML = `
-    <linearGradient id="grad-top-right" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="20%" style="stop-color:#6f4314;stop-opacity:1" />
-      <stop offset="65%" style="stop-color:#e6b52d;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#efc12b;stop-opacity:1" />
-    </linearGradient>
-    <linearGradient id="grad-bottom-left" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#efc12b;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#e6b52d;stop-opacity:1" />
-    </linearGradient>
-  `;
   svg.appendChild(defs);
+
+  // Helper to apply precise letter spacing by using per-character tspans with dx
+  const setTextWithTracking = (textEl: SVGTextElement, text: string, trackingPx: number) => {
+    while (textEl.firstChild) textEl.removeChild(textEl.firstChild);
+    if (!text) return;
+    const first = document.createElementNS(ns, 'tspan');
+    first.textContent = text.charAt(0);
+    textEl.appendChild(first);
+    for (let i = 1; i < text.length; i++) {
+      const tspan = document.createElementNS(ns, 'tspan');
+      tspan.setAttribute('dx', String(trackingPx));
+      tspan.textContent = text.charAt(i);
+      textEl.appendChild(tspan);
+    }
+  };
 
   const bg = document.createElementNS(ns, 'rect');
   bg.setAttribute('width', '793.7');
@@ -93,10 +99,11 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   bg.setAttribute('fill', '#f9eeee');
   svg.appendChild(bg);
 
-  const containerWidth = 750;
-  const containerHeight = 1030;
-  const offsetX = (793.7 - containerWidth) / 2;
-  const offsetY = (1122.5 - containerHeight) / 2;
+  // Draw at full page size to avoid artificial margins
+  const containerWidth = 793.7;
+  const containerHeight = 1122.5;
+  const offsetX = 0;
+  const offsetY = 0;
 
   const g = document.createElementNS(ns, 'g');
   g.setAttribute('transform', `translate(${offsetX}, ${offsetY})`);
@@ -106,6 +113,45 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   certBg.setAttribute('height', `${containerHeight}`);
   certBg.setAttribute('fill', '#f9eeee');
   g.appendChild(certBg);
+
+  // Gradients – use userSpaceOnUse to match CSS look precisely
+  const gradTopRightDef = document.createElementNS(ns, 'linearGradient');
+  gradTopRightDef.setAttribute('id', 'grad-top-right');
+  gradTopRightDef.setAttribute('gradientUnits', 'userSpaceOnUse');
+  gradTopRightDef.setAttribute('x1', String(containerWidth - 195));
+  gradTopRightDef.setAttribute('y1', '0');
+  gradTopRightDef.setAttribute('x2', String(containerWidth));
+  gradTopRightDef.setAttribute('y2', '110');
+  const gtrStop1 = document.createElementNS(ns, 'stop');
+  gtrStop1.setAttribute('offset', '20%');
+  gtrStop1.setAttribute('stop-color', '#6f4314');
+  const gtrStop2 = document.createElementNS(ns, 'stop');
+  gtrStop2.setAttribute('offset', '65%');
+  gtrStop2.setAttribute('stop-color', '#e6b52d');
+  const gtrStop3 = document.createElementNS(ns, 'stop');
+  gtrStop3.setAttribute('offset', '100%');
+  gtrStop3.setAttribute('stop-color', '#efc12b');
+  gradTopRightDef.appendChild(gtrStop1);
+  gradTopRightDef.appendChild(gtrStop2);
+  gradTopRightDef.appendChild(gtrStop3);
+  defs.appendChild(gradTopRightDef);
+
+  const gradBottomLeftDef = document.createElementNS(ns, 'linearGradient');
+  gradBottomLeftDef.setAttribute('id', 'grad-bottom-left');
+  gradBottomLeftDef.setAttribute('gradientUnits', 'userSpaceOnUse');
+  gradBottomLeftDef.setAttribute('x1', '0');
+  gradBottomLeftDef.setAttribute('y1', String(containerHeight));
+  gradBottomLeftDef.setAttribute('x2', '195');
+  gradBottomLeftDef.setAttribute('y2', String(containerHeight - 110));
+  const gblStop1 = document.createElementNS(ns, 'stop');
+  gblStop1.setAttribute('offset', '0%');
+  gblStop1.setAttribute('stop-color', '#efc12b');
+  const gblStop2 = document.createElementNS(ns, 'stop');
+  gblStop2.setAttribute('offset', '100%');
+  gblStop2.setAttribute('stop-color', '#e6b52d');
+  gradBottomLeftDef.appendChild(gblStop1);
+  gradBottomLeftDef.appendChild(gblStop2);
+  defs.appendChild(gradBottomLeftDef);
 
   const borderInner = document.createElementNS(ns, 'rect');
   borderInner.setAttribute('x', '8');
@@ -141,7 +187,8 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   gradBottomLeft.setAttribute('fill', 'url(#grad-bottom-left)');
   g.appendChild(gradBottomLeft);
 
-  let y = 80;
+  // Top padding similar to CSS: 48 outer + 16 content + baseline
+  let y = 48 + 16 + 24;
 
   const header = document.createElementNS(ns, 'text');
   header.setAttribute('x', `${containerWidth / 2}`);
@@ -149,10 +196,9 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   header.setAttribute('text-anchor', 'middle');
   header.setAttribute('font-family', 'Inter');
   header.setAttribute('font-size', '24');
-  header.setAttribute('font-weight', '600');
-  header.setAttribute('letter-spacing', '2');
+  header.setAttribute('font-weight', 'bold');
   header.setAttribute('fill', '#6f4314');
-  header.textContent = data.company;
+  setTextWithTracking(header, data.company, 2);
   g.appendChild(header);
 
   y += 60;
@@ -163,13 +209,13 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   title.setAttribute('text-anchor', 'middle');
   title.setAttribute('font-family', 'Inter');
   title.setAttribute('font-size', '48');
-  title.setAttribute('font-weight', '700');
-  title.setAttribute('letter-spacing', '2');
+  title.setAttribute('font-weight', 'bold');
   title.setAttribute('fill', '#1f2121');
-  title.textContent = data.title;
+  setTextWithTracking(title, data.title, 2);
   g.appendChild(title);
 
-  y += 100;
+  // Increase whitespace between title and amount to match browser layout
+  y += 160;
 
   const amountNum = document.createElementNS(ns, 'text');
   amountNum.setAttribute('x', `${containerWidth / 2}`);
@@ -177,16 +223,24 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   amountNum.setAttribute('text-anchor', 'middle');
   amountNum.setAttribute('font-family', 'Inter');
   amountNum.setAttribute('font-size', '96');
-  amountNum.setAttribute('font-weight', '700');
+  amountNum.setAttribute('font-weight', 'bold');
   amountNum.setAttribute('fill', '#efc12b');
   amountNum.textContent = data.amountNumber;
-  const amountNumShadow = amountNum.cloneNode(true) as SVGTextElement;
-  amountNumShadow.setAttribute('stroke', 'rgba(84, 55, 55, 0.5)');
-  amountNumShadow.setAttribute('stroke-width', '1');
-  g.appendChild(amountNumShadow);
+  // Realistic text-shadow to match CSS
+  const amountShadow = document.createElementNS(ns, 'text');
+  amountShadow.setAttribute('x', `${containerWidth / 2}`);
+  amountShadow.setAttribute('y', `${y}`);
+  amountShadow.setAttribute('text-anchor', 'middle');
+  amountShadow.setAttribute('font-family', 'Inter');
+  amountShadow.setAttribute('font-size', '96');
+  amountShadow.setAttribute('font-weight', 'bold');
+  amountShadow.setAttribute('fill', 'rgba(84,55,55,0.35)');
+  amountShadow.setAttribute('transform', 'translate(1,5)');
+  amountShadow.textContent = data.amountNumber;
+  g.appendChild(amountShadow);
   g.appendChild(amountNum);
 
-  y += 40;
+  y += 48;
 
   const amountTxt = document.createElementNS(ns, 'text');
   amountTxt.setAttribute('x', `${containerWidth / 2}`);
@@ -194,10 +248,9 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   amountTxt.setAttribute('text-anchor', 'middle');
   amountTxt.setAttribute('font-family', 'Inter');
   amountTxt.setAttribute('font-size', '20');
-  amountTxt.setAttribute('font-weight', '600');
-  amountTxt.setAttribute('letter-spacing', '2');
+  amountTxt.setAttribute('font-weight', 'bold');
   amountTxt.setAttribute('fill', '#1f2121');
-  amountTxt.textContent = data.amountText;
+  setTextWithTracking(amountTxt, data.amountText, 2);
   g.appendChild(amountTxt);
 
   y += 80;
@@ -208,10 +261,9 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   issuedLabel.setAttribute('text-anchor', 'middle');
   issuedLabel.setAttribute('font-family', 'Inter');
   issuedLabel.setAttribute('font-size', '14');
-  issuedLabel.setAttribute('font-weight', '600');
-  issuedLabel.setAttribute('letter-spacing', '2');
+  issuedLabel.setAttribute('font-weight', 'bold');
   issuedLabel.setAttribute('fill', '#1f2121');
-  issuedLabel.textContent = data.issuedToLabel;
+  setTextWithTracking(issuedLabel, data.issuedToLabel, 2);
   g.appendChild(issuedLabel);
 
   y += 30;
@@ -221,8 +273,8 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   issuedName.setAttribute('y', `${y}`);
   issuedName.setAttribute('text-anchor', 'middle');
   issuedName.setAttribute('font-family', 'Inter');
-  issuedName.setAttribute('font-size', '16');
-  issuedName.setAttribute('font-weight', '500');
+  issuedName.setAttribute('font-size', '18');
+  issuedName.setAttribute('font-weight', 'normal');
   issuedName.setAttribute('fill', '#1f2121');
   issuedName.textContent = data.issuedToName;
   g.appendChild(issuedName);
@@ -238,17 +290,36 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
 
   y += 50;
 
+  const detailsY = y;
   [data.certNo, data.certClass, data.certDate].forEach((detail, i) => {
-    const t = document.createElementNS(ns, 'text');
-    t.setAttribute('x', `${containerWidth / 2}`);
-    t.setAttribute('y', `${y + i * 20}`);
-    t.setAttribute('text-anchor', 'middle');
-    t.setAttribute('font-family', 'Inter');
-    t.setAttribute('font-size', '14');
-    t.setAttribute('letter-spacing', '2');
-    t.setAttribute('fill', '#1f2121');
-    t.textContent = detail;
-    g.appendChild(t);
+    const rowY = detailsY + i * 20;
+
+    const [labelRaw, ...rest] = detail.split(':');
+    const label = ((labelRaw ?? '').trim().toUpperCase() + ':').trim();
+    const value = rest.join(':').trim();
+
+    // label (right aligned, bold, secondary color)
+    const tLabel = document.createElementNS(ns, 'text');
+    tLabel.setAttribute('x', `${containerWidth / 2 - 6}`);
+    tLabel.setAttribute('y', `${rowY}`);
+    tLabel.setAttribute('text-anchor', 'end');
+    tLabel.setAttribute('font-family', 'Inter');
+    tLabel.setAttribute('font-size', '14');
+    tLabel.setAttribute('font-weight', 'bold');
+    tLabel.setAttribute('fill', '#6f4314');
+    setTextWithTracking(tLabel as SVGTextElement, label, 2);
+    g.appendChild(tLabel);
+
+    // value (left aligned, normal weight, primary color)
+    const tValue = document.createElementNS(ns, 'text');
+    tValue.setAttribute('x', `${containerWidth / 2 + 6}`);
+    tValue.setAttribute('y', `${rowY}`);
+    tValue.setAttribute('text-anchor', 'start');
+    tValue.setAttribute('font-family', 'Inter');
+    tValue.setAttribute('font-size', '14');
+    tValue.setAttribute('fill', '#1f2121');
+    setTextWithTracking(tValue as SVGTextElement, value, 2);
+    g.appendChild(tValue);
   });
 
   y += 100;
@@ -289,7 +360,7 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   sig1Title.setAttribute('text-anchor', 'middle');
   sig1Title.setAttribute('font-family', 'Inter');
   sig1Title.setAttribute('font-size', '14');
-  sig1Title.setAttribute('font-weight', '600');
+  sig1Title.setAttribute('font-weight', 'bold');
   sig1Title.setAttribute('fill', '#1f2121');
   sig1Title.textContent = data.signature1Title;
   g.appendChild(sig1Title);
@@ -320,7 +391,7 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   sig2Title.setAttribute('text-anchor', 'middle');
   sig2Title.setAttribute('font-family', 'Inter');
   sig2Title.setAttribute('font-size', '14');
-  sig2Title.setAttribute('font-weight', '600');
+  sig2Title.setAttribute('font-weight', 'bold');
   sig2Title.setAttribute('fill', '#1f2121');
   sig2Title.textContent = data.signature2Title;
   g.appendChild(sig2Title);
