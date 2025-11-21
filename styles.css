@@ -302,7 +302,7 @@ header p {
   font-size: 14px;
   letter-spacing: 2px;
 
- 
+
 }
 
 .certificate-details p {
@@ -318,7 +318,7 @@ header p {
 
 /* Seal styling */
 .seal-section {
-  margin-top: 96px;
+  margin-top: 16px;
   display: -webkit-flex;
   display: -moz-flex;
   display: flex;
@@ -466,12 +466,23 @@ footer {
   font-weight: 600;
 }
 
-/* Download PDF Button */
-.download-pdf-button {
+/* Button Group */
+.button-group {
   position: fixed;
   top: 20px;
   right: 20px;
   z-index: 1000;
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: flex;
+  gap: 12px;
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  align-items: center;
+}
+
+/* Download PDF Button */
+.download-pdf-button {
   display: -webkit-flex;
   display: -moz-flex;
   display: flex;
@@ -530,9 +541,132 @@ footer {
   flex-shrink: 0;
 }
 
-/* Print-specific styles to hide the button when generating PDF */
+/* Cancel Button */
+.cancel-button {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: flex;
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  align-items: center;
+  gap: 8px;
+  background: -webkit-linear-gradient(135deg, #dc2626, #b91c1c);
+  background: -moz-linear-gradient(135deg, #dc2626, #b91c1c);
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  padding: 12px 24px;
+  border: none;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  -webkit-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  -webkit-transition: all 0.3s ease;
+  -moz-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.cancel-button:hover {
+  -webkit-transform: translateY(-2px);
+  -moz-transform: translateY(-2px);
+  transform: translateY(-2px);
+  -webkit-box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.4), 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.4), 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.4), 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  background: -webkit-linear-gradient(135deg, #b91c1c, #991b1b);
+  background: -moz-linear-gradient(135deg, #b91c1c, #991b1b);
+  background: linear-gradient(135deg, #b91c1c, #991b1b);
+}
+
+.cancel-button:active {
+  -webkit-transform: translateY(0px);
+  -moz-transform: translateY(0px);
+  transform: translateY(0px);
+  -webkit-box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.2);
+}
+
+.cancel-button svg {
+  width: 20px;
+  height: 20px;
+  -webkit-flex-shrink: 0;
+  -moz-flex-shrink: 0;
+  flex-shrink: 0;
+}
+
+/* Watermark Overlay */
+.watermark-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999;
+  pointer-events: none;
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: flex;
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  -moz-justify-content: center;
+  justify-content: center;
+}
+
+.watermark-overlay.hidden {
+  display: none;
+}
+
+.watermark-pattern {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  -moz-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-justify-content: space-around;
+  -moz-justify-content: space-around;
+  justify-content: space-around;
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 80px 60px;
+  gap: 120px 150px;
+  -webkit-transform: rotate(-45deg);
+  -moz-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+}
+
+.watermark-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 96px;
+  font-weight: 900;
+  color: #dc2626;
+  opacity: 0.15;
+  letter-spacing: 8px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+/* Print-specific styles to hide the buttons and watermark when generating PDF */
 @media print {
-  .download-pdf-button {
+  .button-group {
+    display: none !important;
+  }
+  .watermark-overlay {
     display: none !important;
   }
   html, body {
