@@ -101,6 +101,46 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
     }
   };
 
+  const measureCtx = document.createElement("canvas").getContext("2d");
+  const withFallbackWidth = (text: string, fontSize: number, trackingPx: number) =>
+    text.length * (fontSize * 0.6 + trackingPx);
+  const measureTrackedWidth = (
+    text: string,
+    fontFamily: string,
+    fontWeight: number | string,
+    fontSize: number,
+    trackingPx: number,
+  ) => {
+    if (!measureCtx) return withFallbackWidth(text, fontSize, trackingPx);
+    measureCtx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+    const baseWidth = measureCtx.measureText(text).width;
+    return baseWidth + Math.max(0, text.length - 1) * trackingPx;
+  };
+  const wrapTextToWidth = (
+    text: string,
+    maxWidth: number,
+    fontFamily: string,
+    fontWeight: number | string,
+    fontSize: number,
+    trackingPx: number,
+  ) => {
+    const words = text.split(/\s+/).filter(Boolean);
+    if (!words.length) return [""];
+    const lines: string[] = [];
+    let current = words.shift()!;
+    for (const word of words) {
+      const attempt = `${current} ${word}`;
+      if (measureTrackedWidth(attempt, fontFamily, fontWeight, fontSize, trackingPx) <= maxWidth) {
+        current = attempt;
+      } else {
+        lines.push(current);
+        current = word;
+      }
+    }
+    lines.push(current);
+    return lines;
+  };
+
   const bg = document.createElementNS(ns, "rect");
   bg.setAttribute("width", "793.7");
   bg.setAttribute("height", "1122.5");
@@ -254,7 +294,7 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   amountNum.setAttribute("y", `${y}`);
   amountNum.setAttribute("text-anchor", "middle");
   amountNum.setAttribute("font-family", "Inter");
-  amountNum.setAttribute("font-size", "96");
+  amountNum.setAttribute("font-size", "82");
   amountNum.setAttribute("font-weight", "bold");
   amountNum.setAttribute("fill", "#d5a60c");
   amountNum.textContent = data.amountNumber;
@@ -264,7 +304,7 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   amountShadow.setAttribute("y", `${y}`);
   amountShadow.setAttribute("text-anchor", "middle");
   amountShadow.setAttribute("font-family", "Inter");
-  amountShadow.setAttribute("font-size", "96");
+  amountShadow.setAttribute("font-size", "82");
   amountShadow.setAttribute("font-weight", "bold");
   amountShadow.setAttribute("fill", "#5f5c5c");
   amountShadow.setAttribute("transform", "translate(1,3)");
@@ -274,18 +314,31 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
 
   y += 48;
 
-  const amountTxt = document.createElementNS(ns, "text");
-  amountTxt.setAttribute("x", `${containerWidth / 2}`);
-  amountTxt.setAttribute("y", `${y}`);
-  amountTxt.setAttribute("text-anchor", "middle");
-  amountTxt.setAttribute("font-family", "Inter");
-  amountTxt.setAttribute("font-size", "20");
-  amountTxt.setAttribute("font-weight", "bold");
-  amountTxt.setAttribute("fill", "#1f2121");
-  setTextWithTracking(amountTxt, data.amountText, 2);
-  g.appendChild(amountTxt);
+  const amountTracking = 2;
+  const amountFontSize = 16;
+  const amountLineHeight = amountFontSize * 1.375;
+  const amountLines = wrapTextToWidth(
+    data.amountText,
+    containerWidth * 0.8,
+    "Inter",
+    "700",
+    amountFontSize,
+    amountTracking,
+  );
+  amountLines.forEach((line, idx) => {
+    const amountTxtLine = document.createElementNS(ns, "text");
+    amountTxtLine.setAttribute("x", `${containerWidth / 2}`);
+    amountTxtLine.setAttribute("y", `${y + idx * amountLineHeight}`);
+    amountTxtLine.setAttribute("text-anchor", "middle");
+    amountTxtLine.setAttribute("font-family", "Inter");
+    amountTxtLine.setAttribute("font-size", `${amountFontSize}`);
+    amountTxtLine.setAttribute("font-weight", "bold");
+    amountTxtLine.setAttribute("fill", "#1f2121");
+    setTextWithTracking(amountTxtLine, line, amountTracking);
+    g.appendChild(amountTxtLine);
+  });
 
-  y += 80;
+  y += amountLines.length * amountLineHeight + 58;
 
   const issuedLabel = document.createElementNS(ns, "text");
   issuedLabel.setAttribute("x", `${containerWidth / 2}`);
@@ -324,34 +377,32 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
 
   const detailsY = y;
   [data.certNo, data.certClass, data.certDate].forEach((detail, i) => {
-    const rowY = detailsY + i * 20;
-
-    const [labelRaw, ...rest] = detail.split(":");
-    const label = ((labelRaw ?? "").trim().toUpperCase() + ":").trim();
+    const rowY = detailsY + i * 24;
+    const [rawLabel, ...rest] = detail.split(":");
+    const label = ((rawLabel ?? "").trim().toUpperCase() + ":").replace("::", ":");
     const value = rest.join(":").trim();
 
-    // label (right aligned, bold, secondary color)
-    const tLabel = document.createElementNS(ns, "text");
-    tLabel.setAttribute("x", `${containerWidth / 2 - 6}`);
-    tLabel.setAttribute("y", `${rowY}`);
-    tLabel.setAttribute("text-anchor", "end");
-    tLabel.setAttribute("font-family", "Inter");
-    tLabel.setAttribute("font-size", "14");
-    tLabel.setAttribute("font-weight", "bold");
-    tLabel.setAttribute("fill", "#7a6d4d");
-    setTextWithTracking(tLabel as SVGTextElement, label, 2);
-    g.appendChild(tLabel);
+    const detailText = document.createElementNS(ns, "text");
+    detailText.setAttribute("x", `${containerWidth / 2}`);
+    detailText.setAttribute("y", `${rowY}`);
+    detailText.setAttribute("text-anchor", "middle");
+    detailText.setAttribute("font-family", "Inter");
+    detailText.setAttribute("font-size", "14");
+    detailText.setAttribute("letter-spacing", "2");
 
-    // value (left aligned, normal weight, primary color)
-    const tValue = document.createElementNS(ns, "text");
-    tValue.setAttribute("x", `${containerWidth / 2 + 6}`);
-    tValue.setAttribute("y", `${rowY}`);
-    tValue.setAttribute("text-anchor", "start");
-    tValue.setAttribute("font-family", "Inter");
-    tValue.setAttribute("font-size", "14");
-    tValue.setAttribute("fill", "#1f2121");
-    setTextWithTracking(tValue as SVGTextElement, value, 2);
-    g.appendChild(tValue);
+    const labelSpan = document.createElementNS(ns, "tspan");
+    labelSpan.setAttribute("font-weight", "bold");
+    labelSpan.setAttribute("fill", "#7a6d4d");
+    labelSpan.textContent = label;
+
+    const valueSpan = document.createElementNS(ns, "tspan");
+    valueSpan.setAttribute("font-weight", "normal");
+    valueSpan.setAttribute("fill", "#1f2121");
+    valueSpan.textContent = ` ${value}`;
+
+    detailText.appendChild(labelSpan);
+    detailText.appendChild(valueSpan);
+    g.appendChild(detailText);
   });
 
   y += 100;
