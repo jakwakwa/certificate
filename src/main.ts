@@ -4,12 +4,16 @@ import { jsPDF } from "jspdf";
 import { svg2pdf } from "svg2pdf.js";
 
 type CertData = {
-  company: string;
+  companyLogo: string; // Base64 data URL
+  companyLogoWidth: number;
+  companyLogoHeight: number;
+  companyRegNumber: string;
   title: string;
   amountNumber: string;
   amountText: string;
   issuedToLabel: string;
   issuedToName: string;
+  shareholderId: string;
   certNo: string;
   certClass: string;
   certDate: string;
@@ -27,17 +31,55 @@ const FONT_LIST = [
   { url: "/fonts/EBGaramond-Italic.ttf", name: "EB Garamond", style: "italic" as const },
 ] as const;
 
-function extractDataFromDOM(): CertData {
+async function extractDataFromDOM(): Promise<CertData> {
+  const imgEl = document.querySelector("header .header-logo") as HTMLImageElement;
+  let logoDataUrl = "";
+  let logoWidth = 0;
+  let logoHeight = 0;
+
+  if (imgEl) {
+    // Ensure image is loaded or fetch it
+    try {
+        const response = await fetch(imgEl.src);
+        const blob = await response.blob();
+        logoDataUrl = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+        });
+        
+        // Calculate height for 280px width based on natural dimensions
+        if (imgEl.naturalWidth && imgEl.naturalHeight) {
+            logoWidth = 280;
+            logoHeight = (imgEl.naturalHeight / imgEl.naturalWidth) * 280;
+        } else {
+            // Fallback if natural dimensions aren't available (unlikely if loaded)
+             logoWidth = 280;
+             logoHeight = 80; // Default fallback
+        }
+    } catch (e) {
+        console.error("Failed to load logo for PDF", e);
+    }
+  }
+  
+  // The registration number is in the second p tag (or the only p tag if img replaced the first one)
+  // In HTML: <header><img ... /><p>1983/...</p></header>
+  const regNumEl = document.querySelector("header p");
+
   return {
-    company: document.querySelector("header p")!.textContent!.trim(),
+    companyLogo: logoDataUrl,
+    companyLogoWidth: logoWidth,
+    companyLogoHeight: logoHeight,
+    companyRegNumber: regNumEl ? regNumEl.textContent!.trim() : "",
     title: document.querySelector(".title-section h1")!.textContent!.trim(),
     amountNumber: document.querySelector(".amount-number")!.textContent!.trim(),
     amountText: document.querySelector(".amount-text")!.textContent!.trim(),
     issuedToLabel: document.querySelector(".issued-to-label")!.textContent!.trim(),
     issuedToName: document.querySelector(".issued-to-name")!.textContent!.trim(),
-    certNo: (document.querySelector(".certificate-details p:nth-child(1)") as HTMLElement).textContent!.trim(),
-    certClass: (document.querySelector(".certificate-details p:nth-child(2)") as HTMLElement).textContent!.trim(),
-    certDate: (document.querySelector(".certificate-details p:nth-child(3)") as HTMLElement).textContent!.trim(),
+    shareholderId: (document.querySelector(".certificate-details p:nth-child(1)") as HTMLElement).textContent!.trim(),
+    certNo: (document.querySelector(".certificate-details p:nth-child(2)") as HTMLElement).textContent!.trim(),
+    certClass: (document.querySelector(".certificate-details p:nth-child(3)") as HTMLElement).textContent!.trim(),
+    certDate: (document.querySelector(".certificate-details p:nth-child(4)") as HTMLElement).textContent!.trim(),
     signature1Name: (
       document.querySelector(".signature-block:nth-child(1) .signature-name") as HTMLElement
     ).textContent!.trim(),
@@ -262,18 +304,71 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   // Top padding similar to CSS: 48 outer + 16 content + baseline
   let y = 48 + 16 + 24;
 
-  const header = document.createElementNS(ns, "text");
-  header.setAttribute("x", `${containerWidth / 2}`);
-  header.setAttribute("y", `${y}`);
-  header.setAttribute("text-anchor", "middle");
-  header.setAttribute("font-family", "Inter");
-  header.setAttribute("font-size", "24");
-  header.setAttribute("font-weight", "bold");
-  header.setAttribute("fill", "#7a6d4d");
-  setTextWithTracking(header, data.company, 2);
-  g.appendChild(header);
+  if (data.companyLogo) {
+    const logo = document.createElementNS(ns, "image");
+    logo.setAttribute("href", data.companyLogo);
+    // Center logo
+    const x = (containerWidth - data.companyLogoWidth) / 2;
+    logo.setAttribute("x", String(x));
+    // Use previous y as start top
+    // Reset y to be closer to top margin if needed, but sticking to flow
+    // The original text was at y = 48+16+24 = 88 (baseline).
+    // We want the logo to start there or slightly higher?
+    // CSS margins: header p { margin: 0 }
+    // Let's place logo top at y-24 (approx top of text box)
+    const logoY = y - 24;
+    logo.setAttribute("y", String(logoY));
+    logo.setAttribute("width", String(data.companyLogoWidth));
+    logo.setAttribute("height", String(data.companyLogoHeight));
+    g.appendChild(logo);
+    
+    y = logoY + data.companyLogoHeight + 10; // 10px padding
+  } else {
+      // Fallback if no logo
+      const header = document.createElementNS(ns, "text");
+      header.setAttribute("x", `${containerWidth / 2}`);
+      header.setAttribute("y", `${y}`);
+      header.setAttribute("text-anchor", "middle");
+      header.setAttribute("font-family", "Inter");
+      header.setAttribute("font-size", "24");
+      header.setAttribute("font-weight", "bold");
+      header.setAttribute("fill", "#7a6d4d");
+      header.textContent = "STRATCOL HOLDINGS LTD."; // Fallback
+      g.appendChild(header);
+      y += 24;
+  }
 
-  y += 60;
+  // Render Reg Number
+  if (data.companyRegNumber) {
+   
+      // CSS has font-size 14px, margin 10px top/bottom
+      const amountTracking = 4;
+    
+      const amountLines = wrapTextToWidth(
+        data.companyRegNumber,
+        3000,
+        "Inter",
+        "700",
+        13,
+        0.5,
+      );
+
+      amountLines.forEach((line, idx) => {
+        const regNum = document.createElementNS(ns, "text");
+      y += 4   ; 
+      regNum.setAttribute("x", `${containerWidth / 2}`);
+      regNum.setAttribute("y", `${y}`);
+      regNum.setAttribute("text-anchor", "middle");
+      regNum.setAttribute("font-family", "Inter");
+      regNum.setAttribute("font-size", "13"); // Matched to user CSS 13px
+      regNum.setAttribute("font-weight", "bold");
+      regNum.setAttribute("fill", "#7a6d4d");
+      regNum.setAttribute("letter-spacing", "1px");
+      setTextWithTracking(regNum, line, amountTracking);
+      g.appendChild(regNum); 
+  
+
+  y += 78;})}
 
   const title = document.createElementNS(ns, "text");
   title.setAttribute("x", `${containerWidth / 2}`);
@@ -287,14 +382,14 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   g.appendChild(title);
 
   // Increase whitespace between title and amount to match browser layout
-  y += 160;
+  y += 120;
 
   const amountNum = document.createElementNS(ns, "text");
   amountNum.setAttribute("x", `${containerWidth / 2}`);
   amountNum.setAttribute("y", `${y}`);
   amountNum.setAttribute("text-anchor", "middle");
   amountNum.setAttribute("font-family", "Inter");
-  amountNum.setAttribute("font-size", "82");
+  amountNum.setAttribute("font-size", "62"); // Updated to 62px per user CSS
   amountNum.setAttribute("font-weight", "bold");
   amountNum.setAttribute("fill", "#d5a60c");
   amountNum.textContent = data.amountNumber;
@@ -304,7 +399,7 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   amountShadow.setAttribute("y", `${y}`);
   amountShadow.setAttribute("text-anchor", "middle");
   amountShadow.setAttribute("font-family", "Inter");
-  amountShadow.setAttribute("font-size", "82");
+  amountShadow.setAttribute("font-size", "62"); // Updated to 62px per user CSS
   amountShadow.setAttribute("font-weight", "bold");
   amountShadow.setAttribute("fill", "#5f5c5c");
   amountShadow.setAttribute("transform", "translate(1,3)");
@@ -312,18 +407,18 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   g.appendChild(amountShadow);
   g.appendChild(amountNum);
 
-  y += 48;
+  y += 38;
+  const amountFontSize = 14; // Updated to 14px
+  const amountLineHeight = amountFontSize * 1.5;
+  const amountTracking = 3;
 
-  const amountTracking = 2;
-  const amountFontSize = 16;
-  const amountLineHeight = amountFontSize * 1.375;
   const amountLines = wrapTextToWidth(
     data.amountText,
-    containerWidth * 0.8,
+    containerWidth * 0.6,
     "Inter",
     "700",
-    amountFontSize,
-    amountTracking,
+    12,
+    2,
   );
   amountLines.forEach((line, idx) => {
     const amountTxtLine = document.createElementNS(ns, "text");
@@ -333,7 +428,7 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
     amountTxtLine.setAttribute("font-family", "Inter");
     amountTxtLine.setAttribute("font-size", `${amountFontSize}`);
     amountTxtLine.setAttribute("font-weight", "bold");
-    amountTxtLine.setAttribute("fill", "#1f2121");
+    amountTxtLine.setAttribute("fill", "#5f5c5c"); // Updated color to #5f5c5c
     setTextWithTracking(amountTxtLine, line, amountTracking);
     g.appendChild(amountTxtLine);
   });
@@ -376,7 +471,7 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   y += 50;
 
   const detailsY = y;
-  [data.certNo, data.certClass, data.certDate].forEach((detail, i) => {
+  [data.shareholderId, data.certNo, data.certClass, data.certDate].forEach((detail, i) => {
     const rowY = detailsY + i * 24;
     const [rawLabel, ...rest] = detail.split(":");
     const label = ((rawLabel ?? "").trim().toUpperCase() + ":").replace("::", ":");
@@ -388,7 +483,7 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
     detailText.setAttribute("text-anchor", "middle");
     detailText.setAttribute("font-family", "Inter");
     detailText.setAttribute("font-size", "14");
-    detailText.setAttribute("letter-spacing", "2");
+    detailText.setAttribute("letter-spacing", "0.4"); // Updated letter spacing to 0.4px
 
     const labelSpan = document.createElementNS(ns, "tspan");
     labelSpan.setAttribute("font-weight", "bold");
@@ -408,11 +503,11 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   y += 100;
 
   const sealG = document.createElementNS(ns, "g");
-  sealG.setAttribute("transform", `translate(${containerWidth / 2 - 110}, ${y - 30}) scale(0.60)`);
+  sealG.setAttribute("transform", `translate(${containerWidth / 2 - 110}, ${y - 0}) scale(0.54)`);
   sealG.innerHTML = data.sealSVG.replace(/<svg[^>]*>/, "").replace("</svg>", "");
   g.appendChild(sealG);
 
-  y += 320;
+  y += 220;
 
   const sig1X = containerWidth / 2 - 180;
   const sig2X = containerWidth / 2 + 180;
@@ -429,9 +524,9 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   g.appendChild(sig1Name);
 
   const sig1Line = document.createElementNS(ns, "line");
-  sig1Line.setAttribute("x1", `${sig1X - 128}`);
+  sig1Line.setAttribute("x1", `${sig1X - 108}`);
   sig1Line.setAttribute("y1", `${y + 10}`);
-  sig1Line.setAttribute("x2", `${sig1X + 128}`);
+  sig1Line.setAttribute("x2", `${sig1X + 108}`);
   sig1Line.setAttribute("y2", `${y + 10}`);
   sig1Line.setAttribute("stroke", "#7a6d4d");
   sig1Line.setAttribute("stroke-width", "2");
@@ -497,7 +592,7 @@ async function generateVectorPDF() {
   try {
     const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
     await registerFonts(doc);
-    const data = extractDataFromDOM();
+    const data = await extractDataFromDOM();
     const svgEl = buildCertificateSVG(data);
     const width = doc.internal.pageSize.getWidth();
     const height = doc.internal.pageSize.getHeight();

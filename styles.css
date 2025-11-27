@@ -194,15 +194,21 @@ header {
   color: var(--color-text-secondary);
 }
 
+.header-logo {
+  width: 280px;
+  display: block;
+  margin: 0 auto 10px;
+}
+
 header p {
-  font-size: 24px;
+  font-size: 2px;
   font-weight: 600;
   letter-spacing: 2px;
 }
 
 .title-section {
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .title-section h1 {
@@ -228,27 +234,28 @@ header p {
 
 .shares-amount {
   text-align: center;
-  margin: 32px 0;
+  margin: 50px;
 }
 
 .amount-number {
   font-weight: 700;
-  font-size: 96px;
+  font-size: 62px;
   color: var(--color-accent);
   text-shadow:1px 3px 1px #5f5c5c ;
   margin-bottom: 8px;
   line-height: 1.2;
 }
-
+.regNumber,
 .amount-text {
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 2px;
-  font-size: 20px;
+  font-size: 14px;
   line-height: 1.375;
+  color: #5f5c5c;
 }
 
 .issued-to-section {
-  margin-top: 32px;
+  margin-top: 2px;
   width: 100%;
   display: -webkit-flex;
   display: -moz-flex;
@@ -300,7 +307,7 @@ header p {
   flex-direction: column;
   gap: 4px;
   font-size: 14px;
-  letter-spacing: 2px;
+  letter-spacing: 0.4px;
 
 
 }
@@ -342,8 +349,8 @@ header p {
   -webkit-justify-content: center;
   -moz-justify-content: center;
   justify-content: center;
-  width: 128px;
-  height: 128px;
+  width: 108px;
+  height: 108px;
 }
 
 .seal-inner {
@@ -436,6 +443,7 @@ footer {
 }
 
 .signatures-wrapper {
+    margin-top: 40px;
   text-align: center;
 }
 
@@ -453,17 +461,21 @@ footer {
 .signature-name {
   font-style: italic;
   font-size: 28px;
+  line-height: 0.8;
+  margin-top: 10px;
   color: var(--color-text-secondary);
   font-family: 'EB Garamond', serif;
 }
 
 .signature-line {
-  border-bottom: 2px solid var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-text-secondary);
   margin: 8px 0;
 }
 
 .signature-title {
   font-weight: 600;
+  font-size: 13px;
+  margin-top: 10px;
 }
 
 /* Button Group */
@@ -475,10 +487,11 @@ footer {
   display: -webkit-flex;
   display: -moz-flex;
   display: flex;
-  gap: 12px;
-  -webkit-align-items: center;
-  -moz-align-items: center;
-  align-items: center;
+  gap: 32px;
+  flex-direction: column;
+  -webkit-align-items: flex-end;
+  -moz-align-items: flex-end;
+  align-items: flex-end;
 }
 
 /* Download PDF Button */
@@ -495,7 +508,7 @@ footer {
   background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
   color: var(--color-text-primary);
   font-weight: 600;
-  font-size: 14px;
+  font-size: 12px;
   letter-spacing: 0.5px;
   padding: 12px 24px;
   border: none;
@@ -555,7 +568,7 @@ footer {
   background: linear-gradient(135deg, #dc2626, #b91c1c);
   color: #ffffff;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 9px;
   letter-spacing: 0.5px;
   padding: 12px 24px;
   border: none;
@@ -652,7 +665,7 @@ footer {
   font-size: 96px;
   font-weight: 900;
   color: #dc2626;
-  opacity: 0.15;
+  opacity: 0.22;
   letter-spacing: 8px;
   text-transform: uppercase;
   white-space: nowrap;
