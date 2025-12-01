@@ -8,6 +8,7 @@ type CertData = {
   companyLogoWidth: number;
   companyLogoHeight: number;
   companyRegNumber: string;
+  companyName: string;
   title: string;
   amountNumber: string;
   amountText: string;
@@ -71,6 +72,7 @@ async function extractDataFromDOM(): Promise<CertData> {
     companyLogoWidth: logoWidth,
     companyLogoHeight: logoHeight,
     companyRegNumber: regNumEl ? regNumEl.textContent!.trim() : "",
+    companyName: document.querySelector(".title-section p")?.textContent?.trim() || "",
     title: document.querySelector(".title-section h1")!.textContent!.trim(),
     amountNumber: document.querySelector(".amount-number")!.textContent!.trim(),
     amountText: document.querySelector(".amount-text")!.textContent!.trim(),
@@ -368,7 +370,24 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
       g.appendChild(regNum); 
   
 
-  y += 78;})}
+  })
+  
+  y += 78;
+  }
+
+  if (data.companyName) {
+    const companyName = document.createElementNS(ns, "text");
+    companyName.setAttribute("x", `${containerWidth / 2}`);
+    companyName.setAttribute("y", `${y}`);
+    companyName.setAttribute("text-anchor", "middle");
+    companyName.setAttribute("font-family", "Inter");
+    companyName.setAttribute("font-size", "16");
+    companyName.setAttribute("font-weight", "bold");
+    companyName.setAttribute("fill", "#7a6d4d"); // Using the same gold/brown color
+    companyName.textContent = data.companyName;
+    g.appendChild(companyName);
+    y += 48; // Increased spacing significantly to prevent overlap with title
+  }
 
   const title = document.createElementNS(ns, "text");
   title.setAttribute("x", `${containerWidth / 2}`);
@@ -389,7 +408,7 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   amountNum.setAttribute("y", `${y}`);
   amountNum.setAttribute("text-anchor", "middle");
   amountNum.setAttribute("font-family", "Inter");
-  amountNum.setAttribute("font-size", "62"); // Updated to 62px per user CSS
+  amountNum.setAttribute("font-size", "37.2"); // Updated to 37.2px per user CSS
   amountNum.setAttribute("font-weight", "bold");
   amountNum.setAttribute("fill", "#d5a60c");
   amountNum.textContent = data.amountNumber;
@@ -399,7 +418,7 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   amountShadow.setAttribute("y", `${y}`);
   amountShadow.setAttribute("text-anchor", "middle");
   amountShadow.setAttribute("font-family", "Inter");
-  amountShadow.setAttribute("font-size", "62"); // Updated to 62px per user CSS
+  amountShadow.setAttribute("font-size", "37.2"); // Updated to 37.2px per user CSS
   amountShadow.setAttribute("font-weight", "bold");
   amountShadow.setAttribute("fill", "#5f5c5c");
   amountShadow.setAttribute("transform", "translate(1,3)");
@@ -408,11 +427,11 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   g.appendChild(amountNum);
 
   y += 38;
-  const amountFontSize = 14; // Updated to 14px
-  const amountLineHeight = amountFontSize * 1.5;
-  const amountTracking = 3;
+  const amountTextFontSize = 14; // Updated to 14px
+  const amountTextLineHeight = amountTextFontSize * 1.5;
+  const amountTextTracking = 3;
 
-  const amountLines = wrapTextToWidth(
+  const amountTextLines = wrapTextToWidth(
     data.amountText,
     containerWidth * 0.6,
     "Inter",
@@ -420,20 +439,20 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
     12,
     2,
   );
-  amountLines.forEach((line, idx) => {
+  amountTextLines.forEach((line, idx) => {
     const amountTxtLine = document.createElementNS(ns, "text");
     amountTxtLine.setAttribute("x", `${containerWidth / 2}`);
-    amountTxtLine.setAttribute("y", `${y + idx * amountLineHeight}`);
+    amountTxtLine.setAttribute("y", `${y + idx * amountTextLineHeight}`);
     amountTxtLine.setAttribute("text-anchor", "middle");
     amountTxtLine.setAttribute("font-family", "Inter");
-    amountTxtLine.setAttribute("font-size", `${amountFontSize}`);
+    amountTxtLine.setAttribute("font-size", `${amountTextFontSize}`);
     amountTxtLine.setAttribute("font-weight", "bold");
     amountTxtLine.setAttribute("fill", "#5f5c5c"); // Updated color to #5f5c5c
-    setTextWithTracking(amountTxtLine, line, amountTracking);
+    setTextWithTracking(amountTxtLine, line, amountTextTracking);
     g.appendChild(amountTxtLine);
   });
 
-  y += amountLines.length * amountLineHeight + 58;
+  y += amountTextLines.length * amountTextLineHeight + 58;
 
   const issuedLabel = document.createElementNS(ns, "text");
   issuedLabel.setAttribute("x", `${containerWidth / 2}`);
