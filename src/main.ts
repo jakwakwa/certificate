@@ -522,11 +522,11 @@ function buildCertificateSVG(data: CertData): SVGSVGElement {
   y += 100;
 
   const sealG = document.createElementNS(ns, "g");
-  sealG.setAttribute("transform", `translate(${containerWidth / 2 - 110}, ${y - 0}) scale(0.54)`);
+  sealG.setAttribute("transform", `translate(${containerWidth / 2 - 85}, ${y - 0}) scale(0.42)`);
   sealG.innerHTML = data.sealSVG.replace(/<svg[^>]*>/, "").replace("</svg>", "");
   g.appendChild(sealG);
 
-  y += 220;
+  y += 175;
 
   const sig1X = containerWidth / 2 - 180;
   const sig2X = containerWidth / 2 + 180;
